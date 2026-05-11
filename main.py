@@ -2,6 +2,7 @@ import random
 import json
 import os
 import tkinter as tk
+from tkinter import messagebox
 
 palabras_animales = [
     "gatos", "perro", "tigre", "koala", "panda",
@@ -158,7 +159,7 @@ def presionar_tecla(evento):
             letra_actual +=1
 
 def enviar_intento():
-    global intento_actual, letra_actual
+    global intento_actual, letra_actual, secreta, mensaje_label, racha_label, datos
 
     if letra_actual < columnas:
         mensaje_label.config(text="escribi 5 letras primero")
@@ -181,13 +182,14 @@ def enviar_intento():
     
     intento_actual += 1
     letra_actual = 0
+    print(f"intento actual={intento_actual}, filas={filas}")
 
 
     if intento_actual >= filas: 
         datos["racha"] = 0
         datos["jugadas"].append(secreta)
         guardar_datos(datos)
-        mensaje_label.config(text = f"💀 Perdiste, la palabra era {secreta.upper()}")
+        messagebox.showinfo("Perdiste" , f"💀 la palabra era {secreta.upper()}")
         return
 
 
