@@ -8,14 +8,14 @@ palabras_animales = [
     "gatos", "perro", "tigre", "koala", "panda",
     "cisne", "buhos", "ranas", "cebra", "pulpo",
     "toros", "lobos", "llama", "tapir", "alces",
-    "dingo", "bicho", "nutri", "garza", "liebre"
+    "dingo", "bicho", "nutri", "garza", "peces"
 ]
 
 palabras_ciudades = [
     "paris", "tokio", "cairo", "miami", "dubai",
     "delhi", "lagos", "oslo", "berna", "quito",
     "accra", "dakar", "hanoi", "minsk", "sofia",
-    "rabat", "brest", "tours", "lieja", "nicer"
+    "moscu", "prags", "tours", "lieja", "nicer"
 ]
 
 palabras_comida = [
@@ -32,6 +32,11 @@ palabras_argentina = [
     "chori", "mate", "trucho", "villa", "bardo"
 ]
 #palabras para intentar
+
+#configuracion
+filas = 6
+columnas = 5
+tamano_celda = 60
 
 
 tematicas = {
@@ -85,14 +90,8 @@ def guardar_datos(datos):
 
 
 
-#configuracion
-filas = 6
-columnas = 5
-tamano_celda = 60
-
 #variables globales
 datos = cargar_datos()
-secreta = elegir_palabra(datos["jugadas"], palabras_animales)
 intento_actual = 0
 letra_actual = 0
 celdas = []
@@ -106,40 +105,7 @@ color_amarillo = "#f8bbd0"
 color_gris = "#e0e0e0"
 color_texto = "#880e4f"
 
-#ventana
-ventana = tk.Tk()
-ventana.title("Wordle")
-ventana.configure(bg=color_fondo)
-ventana.geometry("1000x1000")
 
-#titulo 
-titulo = tk.Label(ventana, text="WORDLE", font=("Arial",48, "bold"), bg=color_fondo, fg=color_texto)
-titulo.pack(pady=10)
-
-#grilla
-marco = tk.Frame(ventana, bg=color_fondo)
-marco.pack(pady=10)
-
-for fila in range(filas):
-    fila_celdas = []
-    fila_letras = []
-    for col in range(columnas):
-        celda = tk.Label(marco, text="", width=4, height=2, font=("Arial", 24, "bold"), bg=color_celda, fg=color_texto, relief="solid", borderwidth=2)
-        celda.grid(row=fila, column=col, padx=4, pady=4)
-        fila_celdas.append(celda)
-        fila_letras.append("")
-    celdas.append(fila_celdas)
-    letras.append(fila_letras)
-
-#racha
-racha_label = tk.Label(ventana, text=f"🔥 Racha: {datos["racha"]}", font=("Arial, 14"), bg=color_fondo, fg=color_texto)
-racha_label.pack(pady=5)
-
-#mensaje
-mensaje_label = tk.Label(ventana, text="", font=("Arial", 14), bg=color_fondo, fg=color_texto)
-mensaje_label.pack(pady=5)
-
-#logica del teclado
 def presionar_tecla(evento):
     global intento_actual, letra_actual
 
@@ -167,7 +133,6 @@ def enviar_intento():
     
     intento = "".join(letras[intento_actual])
     resultado = comparar(secreta,intento)
-
     colores = {"verde": color_verde, "amarillo": color_amarillo, "gris": color_gris}
     for i in range (columnas):
         celdas[intento_actual][i].config(bg=colores[resultado[i]])
@@ -182,20 +147,94 @@ def enviar_intento():
     
     intento_actual += 1
     letra_actual = 0
-    print(f"intento actual={intento_actual}, filas={filas}")
+    
 
 
     if intento_actual >= filas: 
         datos["racha"] = 0
         datos["jugadas"].append(secreta)
         guardar_datos(datos)
-        messagebox.showinfo("Perdiste" , f"💀 la palabra era {secreta.upper()}")
-        return
+        respuesta = messagebox.askyesno("Perdiste" , f"💀 la palabra era {secreta.upper()}, jugar de nuevo?")
+    if respuesta : 
+        ventana.destroy()
+        return  
+    
+    else: 
+        ventana.destroy()
+    return
 
 
-ventana.bind("<Key>", presionar_tecla)
-ventana.focus_force()
+    
+def abrir_juego(nombre_tematica):
+    global ventana, celdas, letras, intento_actual, letra_actual
+    global racha_label, mensaje_label, secreta, marco
+
+    intento_actual = 0
+    letra_actual = 0
+    celdas = []
+    letras = []
+    secreta = elegir_palabra(datos["jugadas"], tematicas[nombre_tematica])
+    #ventana
+    ventana = tk.Tk()
+    ventana.title("Wordle")
+    ventana.configure(bg=color_fondo)
+    ventana.geometry("1000x1000")
+
+    #titulo 
+    titulo = tk.Label(ventana, text="WORDLE", font=("Arial",48, "bold"), bg=color_fondo, fg=color_texto)
+    titulo.pack(pady=10)
+
+    #grilla
+    marco = tk.Frame(ventana, bg=color_fondo)
+    marco.pack(pady=10)
+
+    for fila in range(filas):
+        fila_celdas = []
+        fila_letras = []
+        for col in range(columnas):
+            celda = tk.Label(marco, text="", width=4, height=2, font=("Arial", 24, "bold"), bg=color_celda, fg=color_texto, relief="solid", borderwidth=2)
+            celda.grid(row=fila, column=col, padx=4, pady=4)
+            fila_celdas.append(celda)
+            fila_letras.append("")
+        celdas.append(fila_celdas)
+        letras.append(fila_letras)
+
+    #racha
+    racha_label = tk.Label(ventana, text=f"🔥 Racha: {datos["racha"]}", font=("Arial, 14"), bg=color_fondo, fg=color_texto)
+    racha_label.pack(pady=5)
+
+    #mensaje
+    mensaje_label = tk.Label(ventana, text="", font=("Arial", 14), bg=color_fondo, fg=color_texto)
+    mensaje_label.pack(pady=5)
+
+    #logica del teclado
+
+    ventana.bind("<Key>", presionar_tecla)
+    ventana.focus_force()
+    ventana.mainloop()
 
 
-ventana.mainloop()
+def iniciar_tematica(nombre, seleccion):
+    global secreta
+    secreta = elegir_palabra(datos["jugadas"], tematicas[nombre])
+    seleccion.destroy()
+    abrir_juego(nombre)
 
+
+def mostrar_seleccion(): 
+    seleccion = tk.Tk()
+    seleccion.title("WORDLE")
+    seleccion.geometry("400x500")
+    seleccion.configure(bg=color_fondo)
+
+    tk.Label(seleccion, text="WORDLE", font=("Arial", 48, "bold"), bg=color_fondo, fg=color_texto).pack(pady=30)
+
+    tk.Label(seleccion, text="Elegi una tematica: ", font=("Arial", 16), bg=color_fondo, fg=color_texto).pack(pady=10)
+
+    for nombre in tematicas:
+        tk.Button(seleccion, text=nombre, font=("Arial", 14, "bold"), bg=color_verde, fg="white", width=20, pady=8, command=lambda n=nombre: iniciar_tematica(n, seleccion)).pack(pady=6)
+
+
+    seleccion.mainloop()
+
+mostrar_seleccion()
