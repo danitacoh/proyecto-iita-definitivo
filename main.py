@@ -1,92 +1,13 @@
-import random
-import json
-import os
+
 import tkinter as tk
 from tkinter import messagebox
-
-palabras_animales = [
-    "gatos", "perro", "tigre", "koala", "panda",
-    "cisne", "buhos", "ranas", "cebra", "pulpo",
-    "toros", "lobos", "llama", "tapir", "alces",
-    "dingo", "bicho", "nutri", "garza", "peces"
-]
-
-palabras_ciudades = [
-    "paris", "tokio", "cairo", "miami", "dubai",
-    "delhi", "lagos", "oslo", "berna", "quito",
-    "accra", "dakar", "hanoi", "minsk", "sofia",
-    "moscu", "prags", "tours", "lieja", "nicer"
-]
-
-palabras_comida = [
-    "pizza", "pasta", "torta", "queso", "limon",
-    "mango", "melon", "sopas", "leche", "cacao",
-    "tacos", "crepe", "sushi", "fideo", "asado",
-    "jugos", "vinos", "plato", "wafer", "dulce"
-]
-
-palabras_argentina = [
-    "asado", "joda", "posta", "fiaca", "salta",
-    "jujuy", "lujan", "tigre", "bicho", "pibe",
-    "guiso", "yerba", "bombo", "tango", "cumbi",
-    "chori", "mate", "trucho", "villa", "bardo"
-]
-#palabras para intentar
+from palabras import tematicas
+from logica import elegir_palabra, comparar, cargar_datos, guardar_datos
 
 #configuracion
 filas = 6
 columnas = 5
 tamano_celda = 60
-
-
-tematicas = {
-    "🐾 Animales": palabras_animales,
-    "🏙️ Ciudades": palabras_ciudades,
-    "🍕 Comida": palabras_comida,
-    "🇦🇷 Modo Argentino": palabras_argentina
-}
-
-def elegir_palabra(jugadas, lista):
-    disponibles= [p for p in lista if p not in jugadas]
-    if not disponibles: 
-        disponibles = lista
-    return random.choice(disponibles)
-
-def comparar(secreta, intento):
-    resultado = []
-    secreta_lista = list(secreta) #copia para evitar letras
-
-    #primera pasada
-    for i in range(5): 
-        if intento[i] == secreta[i]:
-            resultado.append("verde")
-            secreta_lista[i] = None 
-        else: 
-            resultado.append(None)
-
-    #segunda pasada
-
-    for i in range(5):
-        if resultado[i] is not None:
-            continue
-        if intento[i] in secreta_lista:
-            resultado[i] = "amarillo"
-            secreta_lista[secreta_lista.index(intento[i])] = None
-        else: 
-            resultado[i] = "gris"
-
-    return resultado
-
-def cargar_datos():
-    if os.path.exists("datos.json"):
-        with open("datos.json", "r") as f:
-            return json.load(f)
-    return {"racha": 0, "jugadas": []}
-
-
-def guardar_datos(datos): 
-    with open ("datos.json", "w") as f: 
-        json.dump( datos, f)
 
 
 
@@ -142,7 +63,11 @@ def enviar_intento():
         datos["jugadas"].append(secreta)
         guardar_datos(datos)
         racha_label.config(text = f"🔥Racha: {datos["racha"]}")
-        mensaje_label.config(text = "¡Ganaste 🎊!")
+        respuesta = messagebox.askyesno( "¡Ganaste 🎊!" , f"ganaste en el intento {intento_actual +1}!\nRacha: {datos["racha"]}\n\nJugar de nuevo?" )
+        if respuesta:
+          ventana.destroy()
+        else: 
+          ventana.destroy()
         return
     
     intento_actual += 1
